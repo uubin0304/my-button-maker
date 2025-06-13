@@ -1,0 +1,1188 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>나만의 반짝이는 버튼 생성기</title>
+    <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@400;500;700&display=swap" rel="stylesheet">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Noto Sans KR', sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            padding: 20px;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            background: rgba(255, 255, 255, 0.95);
+            border-radius: 20px;
+            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.1);
+            overflow: hidden;
+        }
+
+        .header {
+            background: linear-gradient(135deg, #4f46e5, #7c3aed);
+            color: white;
+            padding: 30px;
+            text-align: center;
+        }
+
+        .header h1 {
+            font-size: 2.5rem;
+            font-weight: 700;
+            margin-bottom: 10px;
+        }
+
+        .header p {
+            font-size: 1.1rem;
+            opacity: 0.9;
+        }
+
+        .main-content {
+            display: grid;
+            grid-template-columns: 1fr 2fr;
+            gap: 0;
+            min-height: 600px;
+        }
+
+        .settings-panel {
+            background: #f8fafc;
+            padding: 30px;
+            border-right: 1px solid #e2e8f0;
+            overflow-y: auto;
+        }
+
+        .preview-panel {
+            padding: 30px;
+            background: white;
+            display: flex;
+            flex-direction: column;
+        }
+
+        .setting-group {
+            margin-bottom: 25px;
+        }
+
+        .setting-group label {
+            display: block;
+            font-weight: 600;
+            color: #374151;
+            margin-bottom: 8px;
+            font-size: 14px;
+        }
+
+        .setting-group input,
+        .setting-group select {
+            width: 100%;
+            padding: 10px 12px;
+            border: 2px solid #e5e7eb;
+            border-radius: 8px;
+            font-size: 14px;
+            transition: border-color 0.2s;
+        }
+
+        .setting-group input:focus,
+        .setting-group select:focus {
+            outline: none;
+            border-color: #4f46e5;
+        }
+
+        .range-display {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-top: 5px;
+        }
+
+        .range-value {
+            background: #4f46e5;
+            color: white;
+            padding: 2px 8px;
+            border-radius: 4px;
+            font-size: 12px;
+            font-weight: 500;
+        }
+
+        .checkbox-group {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .checkbox-group input[type="checkbox"] {
+            width: auto;
+            margin: 0;
+        }
+
+        /* 체크박스 스타일 그룹 */
+        .checkbox-group-styles {
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+        }
+
+        .checkbox-style-option {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            padding: 8px 12px;
+            border: 2px solid #e5e7eb;
+            border-radius: 6px;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            font-size: 14px;
+        }
+
+        .checkbox-style-option:hover {
+            border-color: #4f46e5;
+            background: #f8fafc;
+        }
+
+        .checkbox-style-option input[type="checkbox"] {
+            width: 16px;
+            height: 16px;
+            margin: 0;
+            accent-color: #4f46e5;
+        }
+
+        .checkbox-style-option input[type="checkbox"]:checked + span {
+            font-weight: 600;
+            color: #4f46e5;
+        }
+
+        .checkbox-style-option:has(input:checked) {
+            border-color: #4f46e5;
+            background: #f0f4ff;
+        }
+
+        /* 컬러 팔레트 스타일 */
+        .color-palette {
+            margin-top: 15px;
+            padding: 15px;
+            background: #f8fafc;
+            border-radius: 8px;
+            border: 1px solid #e2e8f0;
+        }
+
+        .palette-title {
+            font-size: 14px;
+            font-weight: 600;
+            color: #374151;
+            margin-bottom: 10px;
+        }
+
+        .color-options {
+            display: grid;
+            grid-template-columns: repeat(5, 1fr);
+            gap: 8px;
+            margin-bottom: 12px;
+            max-height: 200px;
+            overflow-y: auto;
+        }
+
+        .color-option {
+            width: 40px;
+            height: 40px;
+            border-radius: 8px;
+            cursor: pointer;
+            border: 3px solid transparent;
+            transition: all 0.3s ease;
+            position: relative;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+        }
+
+        .color-option:hover {
+            transform: scale(1.1);
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+        }
+
+        .color-option.selected {
+            border-color: #4f46e5;
+            transform: scale(1.1);
+            box-shadow: 0 4px 12px rgba(79, 70, 229, 0.4);
+        }
+
+        .color-option::after {
+            content: attr(data-name);
+            position: absolute;
+            bottom: -25px;
+            left: 50%;
+            transform: translateX(-50%);
+            background: #1f2937;
+            color: white;
+            padding: 4px 8px;
+            border-radius: 4px;
+            font-size: 11px;
+            white-space: nowrap;
+            opacity: 0;
+            visibility: hidden;
+            transition: all 0.3s ease;
+            z-index: 10;
+        }
+
+        .color-option:hover::after {
+            opacity: 1;
+            visibility: visible;
+            bottom: -30px;
+        }
+
+        .selected-color-info {
+            background: #e0e7ff;
+            padding: 8px 12px;
+            border-radius: 6px;
+            font-size: 13px;
+            color: #3730a3;
+            text-align: center;
+            font-weight: 500;
+        }
+
+        .selected-color-info span {
+            font-weight: 600;
+        }
+
+        .preview-section {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            gap: 20px;
+        }
+
+        .preview-area {
+            background: linear-gradient(135deg, #f1f5f9 0%, #e2e8f0 100%);
+            border-radius: 12px;
+            padding: 40px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 200px;
+            border: 2px dashed #cbd5e1;
+        }
+
+        .preview-button {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            font-family: inherit;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            text-decoration: none;
+            font-weight: bold;
+            border: none;
+            overflow: hidden;
+            position: relative;
+            z-index: 1;
+        }
+
+        .code-section {
+            background: #1e293b;
+            border-radius: 12px;
+            padding: 20px;
+            color: white;
+        }
+
+        .code-section h3 {
+            color: #f1f5f9;
+            margin-bottom: 15px;
+            font-size: 1.1rem;
+        }
+
+        .code-container {
+            position: relative;
+        }
+
+        .code-content {
+            background: #0f172a;
+            border-radius: 8px;
+            padding: 20px;
+            overflow-x: auto;
+            font-family: 'Courier New', monospace;
+            font-size: 13px;
+            line-height: 1.5;
+            white-space: pre-wrap;
+            word-wrap: break-word;
+            max-height: 300px;
+            overflow-y: auto;
+        }
+
+        .copy-button {
+            position: absolute;
+            top: 10px;
+            right: 10px;
+            background: #4f46e5;
+            color: white;
+            border: none;
+            padding: 8px 16px;
+            border-radius: 6px;
+            cursor: pointer;
+            font-size: 12px;
+            transition: background 0.2s;
+        }
+
+        .copy-button:hover {
+            background: #3730a3;
+        }
+
+        .copy-button.copied {
+            background: #059669;
+        }
+
+        /* 반짝이는 애니메이션 */
+        @keyframes shiny {
+            0% {
+                background-position: -200% 0;
+            }
+            100% {
+                background-position: 200% 0;
+            }
+        }
+
+        @keyframes pulse {
+            0%, 100% {
+                transform: scale(1);
+            }
+            50% {
+                transform: scale(1.05);
+            }
+        }
+
+        @keyframes wobble {
+            0%, 100% {
+                transform: rotate(0deg);
+            }
+            25% {
+                transform: rotate(3deg);
+            }
+            75% {
+                transform: rotate(-3deg);
+            }
+        }
+
+        @keyframes bounce {
+            0%, 100% {
+                transform: translateY(0);
+            }
+            50% {
+                transform: translateY(-10px);
+            }
+        }
+
+        @keyframes heartbeat {
+            0%, 100% {
+                transform: scale(1);
+            }
+            14% {
+                transform: scale(1.1);
+            }
+            28% {
+                transform: scale(1);
+            }
+            42% {
+                transform: scale(1.1);
+            }
+            70% {
+                transform: scale(1);
+            }
+        }
+
+        @keyframes float {
+            0%, 100% {
+                transform: translateY(0px);
+            }
+            50% {
+                transform: translateY(-8px);
+            }
+        }
+
+        @keyframes glow {
+            0%, 100% {
+                box-shadow: 0 4px 10px rgba(0, 0, 0, 0.15);
+            }
+            50% {
+                box-shadow: 0 4px 20px rgba(0, 0, 0, 0.3), 0 0 20px rgba(255, 255, 255, 0.5);
+            }
+        }
+
+        @media (max-width: 768px) {
+            .main-content {
+                grid-template-columns: 1fr;
+            }
+            
+            .header h1 {
+                font-size: 2rem;
+            }
+            
+            .settings-panel {
+                border-right: none;
+                border-bottom: 1px solid #e2e8f0;
+            }
+
+            .color-options {
+                grid-template-columns: repeat(3, 1fr);
+            }
+
+            .color-option {
+                width: 35px;
+                height: 35px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>✨ 반짝이는 버튼 생성기</h1>
+            <p>현대적인 반짝이는 효과가 있는 버튼을 쉽게 만들어보세요</p>
+        </div>
+
+        <div class="main-content">
+            <div class="settings-panel">
+                <div class="setting-group">
+                    <label>버튼 텍스트</label>
+                    <input type="text" id="buttonText" value="버튼" placeholder="버튼에 표시될 텍스트">
+                </div>
+
+                <div class="setting-group">
+                    <label>링크 주소</label>
+                    <input type="url" id="buttonLink" value="https://example.com/" placeholder="https://example.com">
+                </div>
+
+                <div class="setting-group">
+                    <label>배경 색상</label>
+                    <input type="text" id="backgroundColor" value="#FF00FF" placeholder="#FF00FF" maxlength="7">
+                    <small style="color: #666; font-size: 12px;">예: #FF00FF</small>
+                    
+                    <div class="color-palette">
+                        <div class="palette-title">인기 컬러 선택</div>
+                        <div class="color-options">
+                            <div class="color-option" data-color="#FF00FF" data-name="마젠타 스팽글" style="background: #FF00FF;"></div>
+                            <div class="color-option" data-color="#FD5FFF" data-name="환상 마젠타" style="background: #FD5FFF;"></div>
+                            <div class="color-option" data-color="#FF3CAC" data-name="에너지 핑크" style="background: #FF3CAC;"></div>
+                            <div class="color-option" data-color="#FF6EC7" data-name="버블껌 핑크" style="background: #FF6EC7;"></div>
+                            <div class="color-option" data-color="#FF5CAD" data-name="네온 로즈" style="background: #FF5CAD;"></div>
+                            <div class="color-option" data-color="#E75480" data-name="로즈 펀치" style="background: #E75480;"></div>
+                            <div class="color-option" data-color="#F72585" data-name="핑크 바이올렛" style="background: #F72585;"></div>
+                            <div class="color-option" data-color="#FF69B4" data-name="핑크 하이라이트" style="background: #FF69B4;"></div>
+                            <div class="color-option" data-color="#FF85B3" data-name="벚꽃 캔디" style="background: #FF85B3;"></div>
+                            <div class="color-option" data-color="#FFB6C1" data-name="라이트 핑크" style="background: #FFB6C1;"></div>
+                            <div class="color-option" data-color="#FFAACD" data-name="베이비 캔디" style="background: #FFAACD;"></div>
+                            <div class="color-option" data-color="#FFF700" data-name="네온 바나나" style="background: #FFF700;"></div>
+                            <div class="color-option" data-color="#FFFF00" data-name="순수 노랑" style="background: #FFFF00;"></div>
+                            <div class="color-option" data-color="#39FF14" data-name="네온 라임그린" style="background: #39FF14;"></div>
+                            <div class="color-option" data-color="#7FFF00" data-name="차트리즌 라임" style="background: #7FFF00;"></div>
+                            <div class="color-option" data-color="#ADFF2F" data-name="시트러스 그린" style="background: #ADFF2F;"></div>
+                            <div class="color-option" data-color="#7CFC00" data-name="라이트 그린" style="background: #7CFC00;"></div>
+                            <div class="color-option" data-color="#66FF66" data-name="민트 라이트" style="background: #66FF66;"></div>
+                            <div class="color-option" data-color="#00FF7F" data-name="에메랄드 네온" style="background: #00FF7F;"></div>
+                            <div class="color-option" data-color="#00FFEF" data-name="틱톡 블루" style="background: #00FFEF;"></div>
+                            <div class="color-option" data-color="#FF007F" data-name="네온 핑크" style="background: #FF007F;"></div>
+                            <div class="color-option" data-color="#FF1493" data-name="딥핑크 글로우" style="background: #FF1493;"></div>
+                            <div class="color-option" data-color="#FF7F50" data-name="코랄 오렌지" style="background: #FF7F50;"></div>
+                            <div class="color-option" data-color="#FF8C00" data-name="다크 오렌지" style="background: #FF8C00;"></div>
+                            <div class="color-option" data-color="#FCA311" data-name="썬샤인 오렌지" style="background: #FCA311;"></div>
+                            <div class="color-option" data-color="#FF4500" data-name="오렌지 레드" style="background: #FF4500;"></div>
+                            <div class="color-option" data-color="#FF5E00" data-name="불꽃 오렌지" style="background: #FF5E00;"></div>
+                        </div>
+                        <div class="selected-color-info" id="selectedColorInfo">
+                            선택된 색상: <span id="colorName">마젠타 스팽글</span> <span id="colorCode">#FF00FF</span>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="setting-group">
+                    <label>텍스트 색상</label>
+                    <input type="text" id="textColor" value="#FFFFFF" placeholder="#FFFFFF" maxlength="7">
+                    <small style="color: #666; font-size: 12px;">예: #FFFFFF (흰색)</small>
+                </div>
+
+                <div class="setting-group">
+                    <label>테두리 색상</label>
+                    <input type="text" id="borderColor" value="#000000" placeholder="#000000" maxlength="7">
+                    <small style="color: #666; font-size: 12px;">예: #000000 (검은색)</small>
+                </div>
+
+                <div class="setting-group">
+                    <label>테두리 두께</label>
+                    <input type="range" id="borderWidth" min="0" max="10" value="0">
+                    <div class="range-display">
+                        <span>두께</span>
+                        <span class="range-value" id="borderWidthValue">0px</span>
+                    </div>
+                </div>
+
+                <div class="setting-group">
+                    <label>버튼 스타일 (중복 선택 가능)</label>
+                    <div class="checkbox-group-styles">
+                        <label class="checkbox-style-option">
+                            <input type="checkbox" name="buttonStyles" value="full-width" checked>
+                            <span>기본 확장 (100% 너비)</span>
+                        </label>
+                        <label class="checkbox-style-option">
+                            <input type="checkbox" name="buttonStyles" value="custom">
+                            <span>사용자 정의 (직접 설정)</span>
+                        </label>
+                        <label class="checkbox-style-option">
+                            <input type="checkbox" name="buttonStyles" value="auto-width">
+                            <span>자동 크기 (텍스트 크기에 맞춤)</span>
+                        </label>
+                        <label class="checkbox-style-option">
+                            <input type="checkbox" name="buttonStyles" value="ghost">
+                            <span>고스트 (배경 없음)</span>
+                        </label>
+                        <label class="checkbox-style-option">
+                            <input type="checkbox" name="buttonStyles" value="round">
+                            <span>완전 원형</span>
+                        </label>
+                        <label class="checkbox-style-option">
+                            <input type="checkbox" name="buttonStyles" value="gradient">
+                            <span>그라데이션 배경</span>
+                        </label>
+                        <label class="checkbox-style-option">
+                            <input type="checkbox" name="buttonStyles" value="neon">
+                            <span>번쩍이는 버튼 (네온)</span>
+                        </label>
+                        <label class="checkbox-style-option">
+                            <input type="checkbox" name="buttonStyles" value="retro">
+                            <span>레트로 버튼 (호버시 5배 커짐)</span>
+                        </label>
+                    </div>
+                </div>
+
+                <div class="setting-group">
+                    <label>버튼 너비</label>
+                    <input type="range" id="buttonWidth" min="100" max="400" value="200">
+                    <div class="range-display">
+                        <span>너비</span>
+                        <span class="range-value" id="buttonWidthValue">200px</span>
+                    </div>
+                    <small id="widthNote" style="color: #666; font-size: 12px;">💡 사용자 정의 스타일을 선택하면 너비 설정이 적용됩니다</small>
+                </div>
+
+                <div class="setting-group">
+                    <label>버튼 높이</label>
+                    <input type="range" id="buttonHeight" min="40" max="80" value="56">
+                    <div class="range-display">
+                        <span>높이</span>
+                        <span class="range-value" id="buttonHeightValue">56px</span>
+                    </div>
+                </div>
+
+                <div class="setting-group">
+                    <label>모서리 둥글기</label>
+                    <input type="range" id="borderRadius" min="0" max="30" value="12">
+                    <div class="range-display">
+                        <span>둥글기</span>
+                        <span class="range-value" id="borderRadiusValue">12px</span>
+                    </div>
+                </div>
+
+                <div class="setting-group">
+                    <label>폰트 크기</label>
+                    <input type="range" id="fontSize" min="12" max="32" value="20">
+                    <div class="range-display">
+                        <span>폰트 크기</span>
+                        <span class="range-value" id="fontSizeValue">20px</span>
+                    </div>
+                </div>
+
+                <div class="setting-group">
+                    <label>반짝이는 속도</label>
+                    <input type="range" id="animationSpeed" min="1" max="5" value="3">
+                    <div class="range-display">
+                        <span>속도</span>
+                        <span class="range-value" id="animationSpeedValue">3초</span>
+                    </div>
+                </div>
+
+                <div class="setting-group">
+                    <label>호버 효과</label>
+                    <select id="hoverEffect">
+                        <option value="opacity">투명도 변화</option>
+                        <option value="scale">크기 변화</option>
+                        <option value="pulse">펄스</option>
+                        <option value="wobble">흔들림</option>
+                        <option value="bounce">튕기기</option>
+                        <option value="heartbeat">두근두근</option>
+                    </select>
+                </div>
+
+                <div class="setting-group">
+                    <div class="checkbox-group">
+                        <input type="checkbox" id="enableShiny" checked>
+                        <label for="enableShiny">반짝이는 효과 활성화</label>
+                    </div>
+                </div>
+
+                <div class="setting-group">
+                    <label>기본 애니메이션 효과</label>
+                    <select id="baseAnimation">
+                        <option value="none">없음</option>
+                        <option value="pulse">펄스</option>
+                        <option value="heartbeat">두근두근</option>
+                        <option value="wobble">흔들림</option>
+                        <option value="bounce">튕기기</option>
+                        <option value="float">떠다니기</option>
+                        <option value="glow">빛나기</option>
+                    </select>
+                </div>
+
+                <div class="setting-group">
+                    <label>기본 애니메이션 속도</label>
+                    <input type="range" id="baseAnimationSpeed" min="1" max="5" value="2">
+                    <div class="range-display">
+                        <span>속도</span>
+                        <span class="range-value" id="baseAnimationSpeedValue">2초</span>
+                    </div>
+                </div>
+
+                <div class="setting-group">
+                    <div class="checkbox-group">
+                        <input type="checkbox" id="enableShadow" checked>
+                        <label for="enableShadow">그림자 효과</label>
+                    </div>
+                </div>
+            </div>
+
+            <div class="preview-panel">
+                <div class="preview-section">
+                    <h3>🔍 미리보기</h3>
+                    <div class="preview-area">
+                        <a href="#" class="preview-button" id="previewButton">
+                            버튼
+                        </a>
+                    </div>
+                </div>
+
+                <div class="code-section">
+                    <h3>📋 생성된 코드</h3>
+                    <div class="code-container">
+                        <button class="copy-button" onclick="copyCode()">복사</button>
+                        <div class="code-content" id="generatedCode">코드가 여기에 표시됩니다...</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // 색상 밝기 조절 함수
+        function adjustBrightness(hex, percent) {
+            const num = parseInt(hex.replace("#", ""), 16);
+            const amt = Math.round(2.55 * percent);
+            const R = (num >> 16) + amt;
+            const G = (num >> 8 & 0x00FF) + amt;
+            const B = (num & 0x0000FF) + amt;
+            return "#" + (0x1000000 + (R < 255 ? R < 1 ? 0 : R : 255) * 0x10000 +
+                (G < 255 ? G < 1 ? 0 : G : 255) * 0x100 +
+                (B < 255 ? B < 1 ? 0 : B : 255)).toString(16).slice(1);
+        }
+
+        // 버튼 업데이트
+        function updateButton() {
+            const button = document.getElementById('previewButton');
+            const text = document.getElementById('buttonText').value;
+            const bgColor = document.getElementById('backgroundColor').value;
+            const textColor = document.getElementById('textColor').value;
+            const borderColor = document.getElementById('borderColor').value;
+            const borderWidth = document.getElementById('borderWidth').value;
+            const fontSize = document.getElementById('fontSize').value;
+            const width = document.getElementById('buttonWidth').value;
+            const height = document.getElementById('buttonHeight').value;
+            const borderRadius = document.getElementById('borderRadius').value;
+            const animationSpeed = document.getElementById('animationSpeed').value;
+            const hoverEffect = document.getElementById('hoverEffect').value;
+            const enableShiny = document.getElementById('enableShiny').checked;
+            const enableShadow = document.getElementById('enableShadow').checked;
+            const baseAnimation = document.getElementById('baseAnimation').value;
+            const baseAnimationSpeed = document.getElementById('baseAnimationSpeed').value;
+            const selectedStyles = Array.from(document.querySelectorAll('input[name="buttonStyles"]:checked')).map(cb => cb.value);
+
+            // 색상 유효성 검사
+            const isValidBg = /^#[0-9A-Fa-f]{6}$/.test(bgColor);
+            const isValidText = /^#[0-9A-Fa-f]{6}$/.test(textColor);
+            const isValidBorder = /^#[0-9A-Fa-f]{6}$/.test(borderColor);
+
+            if (!isValidBg || !isValidText || !isValidBorder) {
+                return;
+            }
+
+            // 스타일 안내 업데이트
+            const widthNote = document.getElementById('widthNote');
+            const widthSlider = document.getElementById('buttonWidth');
+            
+            if (selectedStyles.includes('custom')) {
+                widthNote.textContent = '💡 사용자 정의 스타일이 선택되어 너비가 적용됩니다';
+                widthSlider.disabled = false;
+                widthSlider.style.opacity = '1';
+            } else {
+                widthNote.textContent = '💡 사용자 정의 스타일을 선택하면 너비 설정이 적용됩니다';
+                widthSlider.disabled = true;
+                widthSlider.style.opacity = '0.5';
+            }
+
+            // 버튼 텍스트 설정
+            button.textContent = text;
+
+            // 기본 애니메이션 조합
+            let baseAnimations = [];
+            if (enableShiny) {
+                baseAnimations.push('shiny ' + animationSpeed + 's infinite linear');
+            }
+            if (baseAnimation !== 'none') {
+                baseAnimations.push(baseAnimation + ' ' + baseAnimationSpeed + 's infinite ease-in-out');
+            }
+            if (selectedStyles.includes('neon') && !baseAnimations.some(anim => anim.includes('pulse'))) {
+                baseAnimations.push('pulse 1s infinite ease-in-out');
+            }
+
+            // 스타일 설정
+            let buttonWidth = width + 'px';
+            let buttonHeight = height + 'px';
+            let buttonBorderRadius = borderRadius + 'px';
+            let buttonBackground = bgColor;
+            let buttonBorder = borderWidth + 'px solid ' + borderColor;
+            
+            // 스타일 우선순위 적용
+            if (selectedStyles.includes('custom')) {
+                buttonWidth = width + 'px';
+            } else if (selectedStyles.includes('auto-width')) {
+                buttonWidth = 'auto';
+            } else if (selectedStyles.includes('full-width')) {
+                buttonWidth = '100%';
+            }
+            
+            if (selectedStyles.includes('round')) {
+                buttonWidth = height + 'px';
+                buttonBorderRadius = '50%';
+            }
+            
+            if (selectedStyles.includes('ghost')) {
+                buttonBackground = 'transparent';
+                buttonBorder = '2px solid ' + bgColor;
+            }
+            
+            if (selectedStyles.includes('gradient')) {
+                buttonBackground = 'linear-gradient(45deg, ' + bgColor + ', ' + adjustBrightness(bgColor, 30) + ')';
+            }
+            
+            if (selectedStyles.includes('retro')) {
+                buttonBorderRadius = '0px';
+                buttonBorder = '4px outset ' + borderColor;
+            }
+
+            // 버튼 스타일 적용
+            let buttonStyle = '';
+            buttonStyle += 'color: ' + textColor + '; ';
+            buttonStyle += 'font-size: ' + fontSize + 'px; ';
+            buttonStyle += 'border-radius: ' + buttonBorderRadius + '; ';
+            buttonStyle += 'padding: 12px 20px; ';
+            buttonStyle += 'background: ' + buttonBackground + '; ';
+            buttonStyle += 'width: ' + buttonWidth + '; ';
+            buttonStyle += 'height: ' + buttonHeight + '; ';
+            buttonStyle += 'border: ' + buttonBorder + '; ';
+            buttonStyle += 'text-decoration: none; ';
+            buttonStyle += 'font-weight: bold; ';
+            buttonStyle += 'display: inline-flex; ';
+            buttonStyle += 'align-items: center; ';
+            buttonStyle += 'justify-content: center; ';
+            buttonStyle += 'font-family: inherit; ';
+            buttonStyle += 'cursor: pointer; ';
+            buttonStyle += 'transition: all 0.3s ease; ';
+            buttonStyle += 'margin: 0 auto; ';
+            buttonStyle += 'overflow: hidden; ';
+            buttonStyle += 'position: relative; ';
+            buttonStyle += 'z-index: 1; ';
+
+            if (baseAnimations.length > 0) {
+                buttonStyle += 'animation: ' + baseAnimations.join(', ') + '; ';
+            }
+
+            if (enableShadow && baseAnimation !== 'glow') {
+                if (selectedStyles.includes('neon')) {
+                    buttonStyle += 'box-shadow: 0 0 20px ' + bgColor + ', 0 4px 10px rgba(0, 0, 0, 0.15); ';
+                } else {
+                    buttonStyle += 'box-shadow: 0 4px 10px rgba(0, 0, 0, 0.15); ';
+                }
+            }
+
+            if (enableShiny && !selectedStyles.includes('ghost')) {
+                buttonStyle += 'background-image: linear-gradient(135deg, rgba(255,255,255,0) 0%, rgba(255,255,255,0.3) 50%, rgba(255,255,255,0) 100%); ';
+                buttonStyle += 'background-size: 200% 100%; ';
+                buttonStyle += 'background-position: -100% 0; ';
+            }
+
+            button.style.cssText = buttonStyle;
+
+            // 호버 효과 적용
+            const newButton = button.cloneNode(true);
+            button.parentNode.replaceChild(newButton, button);
+            
+            const finalButton = document.getElementById('previewButton');
+            
+            finalButton.addEventListener('mouseenter', function() {
+                let hoverAnimations = [...baseAnimations];
+                
+                switch(hoverEffect) {
+                    case 'opacity':
+                        this.style.opacity = '0.8';
+                        break;
+                    case 'scale':
+                        if (selectedStyles.includes('retro')) {
+                            this.style.transform = 'scale(5)';
+                        } else {
+                            this.style.transform = 'scale(1.05)';
+                        }
+                        break;
+                    case 'pulse':
+                        hoverAnimations.push('pulse 0.6s ease-in-out');
+                        this.style.animation = hoverAnimations.join(', ');
+                        break;
+                    case 'wobble':
+                        hoverAnimations.push('wobble 0.6s ease-in-out');
+                        this.style.animation = hoverAnimations.join(', ');
+                        break;
+                    case 'bounce':
+                        hoverAnimations.push('bounce 0.6s ease-in-out');
+                        this.style.animation = hoverAnimations.join(', ');
+                        break;
+                    case 'heartbeat':
+                        hoverAnimations.push('heartbeat 1.5s ease-in-out');
+                        this.style.animation = hoverAnimations.join(', ');
+                        break;
+                }
+            });
+
+            finalButton.addEventListener('mouseleave', function() {
+                this.style.opacity = '1';
+                this.style.transform = 'scale(1)';
+                if (baseAnimations.length > 0) {
+                    this.style.animation = baseAnimations.join(', ');
+                } else {
+                    this.style.animation = 'none';
+                }
+            });
+
+            // 코드 생성
+            generateCode();
+        }
+
+        // 코드 생성 함수
+        function generateCode() {
+            const text = document.getElementById('buttonText').value;
+            const link = document.getElementById('buttonLink').value;
+            const bgColor = document.getElementById('backgroundColor').value;
+            const textColor = document.getElementById('textColor').value;
+            const borderColor = document.getElementById('borderColor').value;
+            const borderWidth = document.getElementById('borderWidth').value;
+            const fontSize = document.getElementById('fontSize').value;
+            const width = document.getElementById('buttonWidth').value;
+            const height = document.getElementById('buttonHeight').value;
+            const borderRadius = document.getElementById('borderRadius').value;
+            const animationSpeed = document.getElementById('animationSpeed').value;
+            const hoverEffect = document.getElementById('hoverEffect').value;
+            const enableShiny = document.getElementById('enableShiny').checked;
+            const enableShadow = document.getElementById('enableShadow').checked;
+            const baseAnimation = document.getElementById('baseAnimation').value;
+            const baseAnimationSpeed = document.getElementById('baseAnimationSpeed').value;
+            const selectedStyles = Array.from(document.querySelectorAll('input[name="buttonStyles"]:checked')).map(cb => cb.value);
+
+            // 색상 유효성 검사
+            const isValidBg = /^#[0-9A-Fa-f]{6}$/.test(bgColor);
+            const isValidText = /^#[0-9A-Fa-f]{6}$/.test(textColor);
+            const isValidBorder = /^#[0-9A-Fa-f]{6}$/.test(borderColor);
+
+            if (!isValidBg || !isValidText || !isValidBorder) {
+                document.getElementById('generatedCode').textContent = '⚠️ 올바른 색상 코드를 입력해주세요 (예: #FF00FF)';
+                return;
+            }
+
+            // 고유 클래스명 생성
+            const uniqueClass = 'wp-button-' + Math.random().toString(36).substr(2, 9);
+            
+            // 기본 애니메이션
+            let baseAnimations = [];
+            if (enableShiny) {
+                baseAnimations.push('shiny ' + animationSpeed + 's infinite linear');
+            }
+            if (baseAnimation !== 'none') {
+                baseAnimations.push(baseAnimation + ' ' + baseAnimationSpeed + 's infinite ease-in-out');
+            }
+            if (selectedStyles.includes('neon') && !baseAnimations.some(anim => anim.includes('pulse'))) {
+                baseAnimations.push('pulse 1s infinite ease-in-out');
+            }
+
+            // 스타일 설정
+            let buttonWidth = width + 'px';
+            let buttonHeight = height + 'px';
+            let buttonBorderRadius = borderRadius + 'px';
+            let buttonBackground = bgColor;
+            let buttonBorder = borderWidth + 'px solid ' + borderColor;
+            
+            if (selectedStyles.includes('custom')) {
+                buttonWidth = width + 'px';
+            } else if (selectedStyles.includes('auto-width')) {
+                buttonWidth = 'auto';
+            } else if (selectedStyles.includes('full-width')) {
+                buttonWidth = '100%';
+            }
+            
+            if (selectedStyles.includes('round')) {
+                buttonWidth = height + 'px';
+                buttonBorderRadius = '50%';
+            }
+            
+            if (selectedStyles.includes('ghost')) {
+                buttonBackground = 'transparent';
+                buttonBorder = '2px solid ' + bgColor;
+            }
+            
+            if (selectedStyles.includes('gradient')) {
+                buttonBackground = 'linear-gradient(45deg, ' + bgColor + ', ' + adjustBrightness(bgColor, 30) + ')';
+            }
+            
+            if (selectedStyles.includes('retro')) {
+                buttonBorderRadius = '0px';
+                buttonBorder = '4px outset ' + borderColor;
+            }
+
+            // 호버 스타일
+            let hoverStyles = '';
+            let animationCode = '';
+            
+            switch(hoverEffect) {
+                case 'opacity':
+                    hoverStyles = 'opacity: 0.8 !important;';
+                    break;
+                case 'scale':
+                    if (selectedStyles.includes('retro')) {
+                        hoverStyles = 'transform: scale(5) !important;';
+                    } else {
+                        hoverStyles = 'transform: scale(1.05) !important;';
+                    }
+                    break;
+                default:
+                    hoverStyles = 'opacity: 0.9 !important;';
+                    break;
+            }
+
+            // 애니메이션 코드
+            if (enableShiny) {
+                animationCode += '@keyframes shiny { 0% { background-position: -200% 0; } 100% { background-position: 200% 0; } }' + '\n';
+            }
+
+            if (baseAnimation === 'pulse' || selectedStyles.includes('neon')) {
+                animationCode += '@keyframes pulse { 0%, 100% { transform: scale(1); } 50% { transform: scale(1.05); } }' + '\n';
+            }
+
+            if (baseAnimation === 'heartbeat') {
+                animationCode += '@keyframes heartbeat { 0%, 100% { transform: scale(1); } 14% { transform: scale(1.1); } 28% { transform: scale(1); } 42% { transform: scale(1.1); } 70% { transform: scale(1); } }' + '\n';
+            }
+
+            if (baseAnimation === 'wobble') {
+                animationCode += '@keyframes wobble { 0%, 100% { transform: rotate(0deg); } 25% { transform: rotate(3deg); } 75% { transform: rotate(-3deg); } }' + '\n';
+            }
+
+            if (baseAnimation === 'bounce') {
+                animationCode += '@keyframes bounce { 0%, 100% { transform: translateY(0); } 50% { transform: translateY(-10px); } }' + '\n';
+            }
+
+            if (baseAnimation === 'float') {
+                animationCode += '@keyframes float { 0%, 100% { transform: translateY(0px); } 50% { transform: translateY(-8px); } }' + '\n';
+            }
+
+            if (baseAnimation === 'glow') {
+                animationCode += '@keyframes glow { 0%, 100% { box-shadow: 0 4px 10px rgba(0, 0, 0, 0.15); } 50% { box-shadow: 0 4px 20px rgba(0, 0, 0, 0.3), 0 0 20px rgba(255, 255, 255, 0.5); } }' + '\n';
+            }
+
+            // 속성들
+            const animationProperty = baseAnimations.length > 0 ? ' animation: ' + baseAnimations.join(', ') + ' !important;' : '';
+            
+            let shadowProperty = '';
+            if (enableShadow && baseAnimation !== 'glow') {
+                if (selectedStyles.includes('neon')) {
+                    shadowProperty = ' box-shadow: 0 0 20px ' + bgColor + ', 0 4px 10px rgba(0, 0, 0, 0.15) !important;';
+                } else {
+                    shadowProperty = ' box-shadow: 0 4px 10px rgba(0, 0, 0, 0.15) !important;';
+                }
+            }
+            
+            const shinyProperty = (enableShiny && !selectedStyles.includes('ghost')) ? ' background-image: linear-gradient(135deg, rgba(255,255,255,0) 0%, rgba(255,255,255,0.3) 50%, rgba(255,255,255,0) 100%) !important; background-size: 200% 100% !important; background-position: -100% 0 !important;' : '';
+
+            // 최종 코드 생성
+            const code = '<!-- 워드프레스 구텐베르크 HTML 블록 호환 버튼 -->' + '\n' +
+            '<div class="wp-button-container">' + '\n' +
+            '  <a href="' + link + '" class="' + uniqueClass + '">' + '\n' +
+            '    ' + text + '\n' +
+            '  </a>' + '\n' +
+            '</div>' + '\n\n' +
+            '<style>' + '\n' +
+            '/* 워드프레스 호환 버튼 스타일 */' + '\n' +
+            '.wp-button-container {' + '\n' +
+            '  display: flex !important;' + '\n' +
+            '  justify-content: center !important;' + '\n' +
+            '  width: 100% !important;' + '\n' +
+            '  margin: 20px 0 !important;' + '\n' +
+            '  box-sizing: border-box !important;' + '\n' +
+            '}' + '\n\n' +
+            '.' + uniqueClass + ' {' + '\n' +
+            '  color: ' + textColor + ' !important;' + '\n' +
+            '  font-size: ' + fontSize + 'px !important;' + '\n' +
+            '  border-radius: ' + buttonBorderRadius + ' !important;' + '\n' +
+            '  padding: 12px 20px !important;' + '\n' +
+            '  background: ' + buttonBackground + ' !important;' + '\n' +
+            '  border: ' + buttonBorder + ' !important;' + '\n' +
+            '  width: ' + buttonWidth + ' !important;' + '\n' +
+            '  height: ' + buttonHeight + ' !important;' + '\n' +
+            '  display: inline-flex !important;' + '\n' +
+            '  align-items: center !important;' + '\n' +
+            '  justify-content: center !important;' + '\n' +
+            '  font-family: inherit !important;' + '\n' +
+            '  font-weight: bold !important;' + '\n' +
+            '  cursor: pointer !important;' + '\n' +
+            '  text-decoration: none !important;' + '\n' +
+            '  transition: all 0.3s ease !important;' + '\n' +
+            '  overflow: hidden !important;' + '\n' +
+            '  position: relative !important;' + '\n' +
+            '  z-index: 1 !important;' + '\n' +
+            '  box-sizing: border-box !important;' +
+            animationProperty + shinyProperty + shadowProperty + '\n' +
+            '}' + '\n\n' +
+            '.' + uniqueClass + ':hover {' + '\n' +
+            '  ' + hoverStyles + '\n' +
+            '}' + '\n\n' +
+            '.' + uniqueClass + ':focus {' + '\n' +
+            '  outline: 2px solid ' + bgColor + ' !important;' + '\n' +
+            '  outline-offset: 2px !important;' + '\n' +
+            '}' + '\n\n' +
+            animationCode + '\n' +
+            '/* 워드프레스 반응형 */' + '\n' +
+            '@media (max-width: 768px) {' + '\n' +
+            '  .' + uniqueClass + ' {' + '\n' +
+            '    width: 90% !important;' + '\n' +
+            '    font-size: ' + Math.max(14, fontSize - 4) + 'px !important;' + '\n' +
+            '    padding: 10px 16px !important;' + '\n' +
+            '  }' + '\n' +
+            '}' + '\n\n' +
+            '/* 워드프레스 테마 호환성 */' + '\n' +
+            '.wp-block-html .' + uniqueClass + ' {' + '\n' +
+            '  color: ' + textColor + ' !important;' + '\n' +
+            '  background: ' + buttonBackground + ' !important;' + '\n' +
+            '}' + '\n' +
+            '</style>';
+
+            document.getElementById('generatedCode').textContent = code;
+        }
+
+        // 코드 복사 함수
+        function copyCode() {
+            const code = document.getElementById('generatedCode').textContent;
+            navigator.clipboard.writeText(code).then(() => {
+                const button = document.querySelector('.copy-button');
+                const originalText = button.textContent;
+                button.textContent = '복사됨!';
+                button.classList.add('copied');
+                
+                setTimeout(() => {
+                    button.textContent = originalText;
+                    button.classList.remove('copied');
+                }, 2000);
+            });
+        }
+
+        // 슬라이더 값 업데이트
+        function updateRangeValue(sliderId, valueId, suffix) {
+            const slider = document.getElementById(sliderId);
+            const valueDisplay = document.getElementById(valueId);
+            
+            slider.addEventListener('input', function() {
+                const unit = (sliderId === 'animationSpeed' || sliderId === 'baseAnimationSpeed') ? '초' : (suffix || 'px');
+                valueDisplay.textContent = this.value + unit;
+                updateButton();
+            });
+        }
+
+        // 초기화
+        document.addEventListener('DOMContentLoaded', function() {
+            updateRangeValue('fontSize', 'fontSizeValue');
+            updateRangeValue('buttonWidth', 'buttonWidthValue');
+            updateRangeValue('buttonHeight', 'buttonHeightValue');
+            updateRangeValue('borderRadius', 'borderRadiusValue');
+            updateRangeValue('borderWidth', 'borderWidthValue');
+            updateRangeValue('animationSpeed', 'animationSpeedValue');
+            updateRangeValue('baseAnimationSpeed', 'baseAnimationSpeedValue');
+
+            // 컬러 팔레트 이벤트
+            const colorOptions = document.querySelectorAll('.color-option');
+            const backgroundInput = document.getElementById('backgroundColor');
+            const colorNameSpan = document.getElementById('colorName');
+            const colorCodeSpan = document.getElementById('colorCode');
+
+            colorOptions.forEach(option => {
+                option.addEventListener('click', function() {
+                    const color = this.getAttribute('data-color');
+                    const name = this.getAttribute('data-name');
+                    
+                    colorOptions.forEach(opt => opt.classList.remove('selected'));
+                    this.classList.add('selected');
+                    
+                    backgroundInput.value = color;
+                    colorNameSpan.textContent = name;
+                    colorCodeSpan.textContent = color;
+                    
+                    updateButton();
+                });
+            });
+
+            // 초기 선택
+            const initialOption = document.querySelector('.color-option[data-color="#FF00FF"]');
+            if (initialOption) {
+                initialOption.classList.add('selected');
+            }
+
+            // 직접 입력시 컬러 정보 업데이트
+            backgroundInput.addEventListener('input', function() {
+                const inputColor = this.value.toUpperCase();
+                const matchingOption = document.querySelector('.color-option[data-color="' + inputColor + '"]');
+                
+                colorOptions.forEach(opt => opt.classList.remove('selected'));
+                
+                if (matchingOption) {
+                    matchingOption.classList.add('selected');
+                    colorNameSpan.textContent = matchingOption.getAttribute('data-name');
+                    colorCodeSpan.textContent = inputColor;
+                } else {
+                    colorNameSpan.textContent = '사용자 정의';
+                    colorCodeSpan.textContent = inputColor;
+                }
+                
+                updateButton();
+            });
+
+            // 모든 입력 요소 이벤트
+            document.querySelectorAll('input, select').forEach(element => {
+                if (!element.classList.contains('color-option')) {
+                    element.addEventListener('input', updateButton);
+                    element.addEventListener('change', updateButton);
+                }
+            });
+
+            // 체크박스 스타일 이벤트
+            document.querySelectorAll('input[name="buttonStyles"]').forEach(checkbox => {
+                checkbox.addEventListener('change', updateButton);
+            });
+
+            // 초기 버튼 생성
+            updateButton();
+        });
+    </script>
+</body>
+</html>
